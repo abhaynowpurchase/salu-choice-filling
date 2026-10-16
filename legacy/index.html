@@ -117,6 +117,7 @@ textarea{width:100%;box-sizing:border-box;font-family:var(--mono);font-size:.78r
       <span id="clearbox"><button id="clear" class="danger">Clear</button></span>
     </div></div>
   <div class="status" id="st" role="status"></div>
+  <div class="meta" id="dbst" style="padding:0 14px 8px"></div>
   <div class="list slip" id="mine"></div>
   <div style="padding:12px 14px"><label class="eyebrow" for="out">Text of your list (copy into notes or WhatsApp)</label><textarea id="out" readonly></textarea></div>
 </section>
@@ -138,7 +139,14 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const chipCls=c=>'c-'+String(c).split(' ')[0];
 const nobond=d=>/none/i.test(d.bond);
 const errs={};
-function save(){PREFS[tab]=pref;try{localStorage.setItem(KEYS[tab],JSON.stringify(pref));localStorage.setItem('dch-sheet-tab',tab)}catch(e){}}
+let API=location.protocol.startsWith('http');let saveT={};
+function dbStatus(t){const el=document.getElementById('dbst');if(el)el.textContent=t}
+function pushDB(t){if(!API)return;clearTimeout(saveT[t]);saveT[t]=setTimeout(()=>{
+  fetch('/api/preferences/'+t,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({pref:PREFS[t]})})
+  .then(r=>r.json().then(j=>({ok:r.ok,j})))
+  .then(({ok,j})=>dbStatus(ok?'Saved to database · '+new Date().toLocaleTimeString():'Not saved to database: '+(j.error||'error')))
+  .catch(()=>dbStatus('Database offline: saved in this browser only'))},600)}
+function save(){PREFS[tab]=pref;try{localStorage.setItem(KEYS[tab],JSON.stringify(pref));localStorage.setItem('dch-sheet-tab',tab)}catch(e){}pushDB(tab)}
 const owner=n=>{for(const k in pref) if(pref[k]===n) return +k; return null};
 const sorted=()=>Object.keys(pref).map(Number).sort((a,b)=>pref[a]-pref[b]);
 const nextFree=()=>{const used=new Set(Object.values(pref));let n=1;while(used.has(n))n++;return n};
@@ -205,6 +213,11 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
   else if(b.id==='no'){$('clearbox').innerHTML='<button id="clear" class="danger">Clear</button>'}
 });
 setTab(tab);
+if(API){dbStatus('Loading from database…');
+ Promise.all(['dch','pd'].map(t=>fetch('/api/preferences/'+t).then(r=>{if(!r.ok)throw 0;return r.json()}).then(p=>{const c={};for(const k in p)if(ALL[t][k]&&Number.isInteger(p[k]))c[k]=p[k];PREFS[t]=c})))
+ .then(()=>{pref=PREFS[tab];renderAll();renderMine();try{localStorage.setItem(KEYS.dch,JSON.stringify(PREFS.dch));localStorage.setItem(KEYS.pd,JSON.stringify(PREFS.pd))}catch(e){};dbStatus('Loaded from database')})
+ .catch(()=>{API=false;dbStatus('Database offline: saved in this browser only')})}
+else dbStatus('Opened as a file: saved in this browser only. Run the server to save to the database.');
 </script>
 </body>
 </html>

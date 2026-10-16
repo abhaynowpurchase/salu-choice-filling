@@ -1,0 +1,19 @@
+export type Tab = 'dch' | 'pd';
+export type Option = {
+  _id: string;
+  id: number;
+  tab: Tab;
+  course: string;
+  group: string;
+  name: string;
+  short: string;
+  state: string;
+  open: number | null;
+  total: number | null;
+  rank: number | null;
+  chance: string;
+  bond: string;
+  stipend: string;
+  note: string;
+};
+export type Prefs = Record<string, number>;
