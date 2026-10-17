@@ -182,7 +182,7 @@ export default function ChoiceSheet() {
 
   const facts = (o: Option) => (
     <div className="facts">
-      <span>{o.state}</span>
+      <span>{o.state}{o.type === 'Govt' ? ' · Govt' : o.type === 'Pvt' ? ' · Private' : ''}</span>
       <span>Open <b className="num">{o.open ?? '–'}/{o.total ?? '–'}</b></span>
       <span>2025 rank <b className="num">{fmtRank(o.rank)}</b></span>
       <span>Stipend <b>{o.stipend}</b></span>

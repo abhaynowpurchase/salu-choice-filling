@@ -19,5 +19,6 @@ export type Option = {
   hostel?: string;
   code?: string | null;
   stipend_src?: string;
+  type?: string;
 };
 export type Prefs = Record<string, number>;
