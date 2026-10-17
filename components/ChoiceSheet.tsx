@@ -186,6 +186,8 @@ export default function ChoiceSheet() {
       <span>Open <b className="num">{o.open ?? '–'}/{o.total ?? '–'}</b></span>
       <span>2025 rank <b className="num">{fmtRank(o.rank)}</b></span>
       <span>Stipend <b>{o.stipend}</b></span>
+      {o.fee && <span>Fee <b>{o.fee}</b></span>}
+      {o.hostel && <span>Female hostel <b>{o.hostel}</b></span>}
       <span style={{ gridColumn: '1 / -1' }}>Bond <b>{o.bond}</b></span>
     </div>
   );
@@ -342,8 +344,7 @@ export default function ChoiceSheet() {
         </div>
 
         <p className="foot">
-          Chance uses 2025 MCC Round 2, Round 3 and Stray last Open ranks. Stipend is monthly; “~” means the state government rate.
-          Bond from Meducate 2025-26 and state rules. Confirm bond and stipend in MCC Participating Institute Details before locking.
+          Chance uses 2025 MCC Round 2, Round 3 and Stray last Open ranks. Stipend, fee, female hostel and bond come from each hospital’s MCC Institute Profile and the bond documents on MCC (17 Oct 2026); “(est.)” marks hospitals that have not filled their MCC profile. Confirm bond and stipend in MCC Participating Institute Details before locking.
           MCC order is only your preference: a hard choice placed high never costs you an easier one lower down.
         </p>
       </div>

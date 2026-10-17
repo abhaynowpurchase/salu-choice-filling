@@ -15,5 +15,9 @@ export type Option = {
   bond: string;
   stipend: string;
   note: string;
+  fee?: string;
+  hostel?: string;
+  code?: string | null;
+  stipend_src?: string;
 };
 export type Prefs = Record<string, number>;
