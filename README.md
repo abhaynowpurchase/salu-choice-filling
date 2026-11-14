@@ -33,6 +33,8 @@ MongoDB database `salu_choice_filling`: collections `options` and `preferences` 
 
 Works on Vercel: import the repo and set the `DATABASE_URL` environment variable. In MongoDB Atlas, allow access from the host (Network Access).
 
+`public/round2.html` (served at `/round2.html`) is the MCC Round 2 drag-and-drop choice order: Salu's handwritten shortlist (41 choices) plus the full v5 list to add from. Order saves in the browser; use Copy list before entering on MCC.
+
 `legacy/index.html` is the original single-file version (saves in the browser only).
 
 Data sources: MCC NEET PG 2025 allotment results (Rounds 1–3, Stray), MCC Final DNB Seat Matrix 2026, Meducate DNB stipend and bond tables. Always confirm bond and stipend in MCC Participating Institute Details before locking choices.
