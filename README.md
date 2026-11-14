@@ -25,6 +25,8 @@ Open http://localhost:3000.
 |---|---|---|
 | `/api/options?tab=dch\|pd` | GET | All options for a tab |
 | `/api/preferences/:tab` | GET | `{ "<option id>": number }` |
+| `/api/round2` | GET | Saved Round 2 order `{ order: ["3-701429", ...], updated_at }` |
+| `/api/round2` | PUT | Body `{ "order": [...] }`; replaces the saved Round 2 order |
 | `/api/preferences/:tab` | PUT | Body `{ "pref": { "<option id>": number } }`; replaces the list, rejects repeated numbers |
 
 MongoDB database `salu_choice_filling`: collections `options` and `preferences` (unique indexes on tab+number and tab+option).
@@ -33,7 +35,7 @@ MongoDB database `salu_choice_filling`: collections `options` and `preferences` 
 
 Works on Vercel: import the repo and set the `DATABASE_URL` environment variable. In MongoDB Atlas, allow access from the host (Network Access).
 
-`public/round2.html` (served at `/round2.html`; `/` redirects there, the Round 1 sheet is at `/round1`) is the MCC Round 2 drag-and-drop choice order: Salu's handwritten shortlist (41 choices) plus the full v5 list to add from. Order saves in the browser; use Copy list before entering on MCC.
+`public/round2.html` (served at `/round2.html`; `/` redirects there, the Round 1 sheet is at `/round1`) is the MCC Round 2 drag-and-drop choice order: Salu's handwritten shortlist (41 choices) plus the full v5 list to add from. The order is saved in MongoDB (collection `round2_order`, via `GET/PUT /api/round2`), with a browser copy as fallback; use Copy list before entering on MCC.
 
 `legacy/index.html` is the original single-file version (saves in the browser only).
 

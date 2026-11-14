@@ -41,6 +41,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 :root[data-theme="dark"] .primary{color:#1a1206}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .primary{color:#1a1206}}
 .status{font-size:12px;color:var(--afms-ink);min-height:1em}
+.db{font-size:12px;color:var(--muted)}.db.ok{color:var(--afms-ink)}.db.bad{color:var(--danger)}
 ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
 .item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
 .item.deg{border-left:4px solid var(--deg-ink)}
@@ -79,11 +80,12 @@ textarea{position:absolute;left:-9999px}
 
 <div class="wrap">
   <h1>Salu's MCC Round 2 choice order</h1>
-  <p class="sub">AIR 42,456 · UR · Drag the <b>⠿</b> handle (or use ▲ ▼) to reorder. Order is saved in this browser. Copy the final list and enter it on MCC in the same order. <b>Locking closes 15 Nov 2026, 11:55 PM.</b> <a href="/round1" style="color:var(--accent)">Old Round 1 sheet</a></p>
+  <p class="sub">AIR 42,456 · UR · Drag the <b>⠿</b> handle (or use ▲ ▼) to reorder. Order is saved to the database, so it is the same on every phone and laptop. Copy the final list and enter it on MCC in the same order. <b>Locking closes 15 Nov 2026, 11:55 PM.</b> <a href="/round1" style="color:var(--accent)">Old Round 1 sheet</a></p>
 
   <div class="bar">
     <span class="count" id="count"></span>
     <span class="status" id="status" role="status"></span>
+    <span class="db" id="db" aria-live="polite"></span>
     <button id="copy" class="primary" type="button">Copy list</button>
     <button id="reset" type="button">Reset to her order</button>
   </div>
@@ -112,7 +114,19 @@ const KEY='salu-mcc-r2-order-v1';
 let order=DATA.mine.map(x=>x.id);
 try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(Array.isArray(s)&&s.length&&s.every(i=>ALL[i]))order=s;}catch(e){}
 const $=id=>document.getElementById(id);
-function save(){try{localStorage.setItem(KEY,JSON.stringify(order))}catch(e){}}
+let dbTimer=null,dbOk=null;
+function dbState(t,ok){const el=$('db');el.textContent=t;el.className='db '+(ok===true?'ok':ok===false?'bad':'')}
+function pushDb(){clearTimeout(dbTimer);dbState('Saving…',null);dbTimer=setTimeout(async()=>{
+  try{const r=await fetch('/api/round2',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({order})});
+    const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||r.status);dbOk=true;dbState('Saved to database',true);}
+  catch(e){dbOk=false;dbState('Not saved to database ('+e.message+') - kept in this browser',false)}},700)}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(order))}catch(e){}pushDb()}
+async function loadDb(){dbState('Loading from database…',null);
+  try{const r=await fetch('/api/round2',{cache:'no-store'});const j=await r.json();if(!r.ok)throw new Error(j.error||r.status);
+    const o=(j.order||[]).filter(i=>ALL[i]);
+    if(o.length){order=o;try{localStorage.setItem(KEY,JSON.stringify(order))}catch(e){};render();dbState('Loaded from database'+(j.updated_at?' · last saved '+new Date(j.updated_at).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'}):''),true)}
+    else{pushDb()}}
+  catch(e){dbState('Database not reachable - using this browser\'s copy',false)}}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function cls(x){return x.t==='AFMS'?'afms':(x.g==='DCH'?'':'deg')}
 function details(x){
@@ -154,6 +168,7 @@ $('copy').onclick=()=>{
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).then(done,fb);else fb();
 };
 render();
+loadDb();
 if(window.Sortable){Sortable.create($('list'),{handle:'.handle',animation:150,ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',delay:0,
   onEnd(){order=[...$('list').children].map(li=>li.dataset.id);save();render();}});}
 </script>
