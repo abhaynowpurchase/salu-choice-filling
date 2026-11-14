@@ -1,5 +1,5 @@
-import ChoiceSheet from '@/components/ChoiceSheet';
+import { redirect } from 'next/navigation';
 
 export default function Page() {
-  return <ChoiceSheet />;
+  redirect('/round2.html');
 }
